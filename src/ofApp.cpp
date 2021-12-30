@@ -39,8 +39,6 @@ void ofApp::setup(){
     ofSetFrameRate(60);
     ofSetVerticalSync(true);
     
-    
-//    agent_render_shader.load("shader/agent_deposit");
     diffuse_shader.load("shader/diffuse");
     agent_update_shader.load("shader/agent_update");
     point_shader.load("shader/point");
@@ -49,9 +47,9 @@ void ofApp::setup(){
     
     ofSetWindowShape( screen_size.x, screen_size.y );
     
-    agent_fbo.allocate(screen_size.x, screen_size.y);
-    sense_fbo.allocate(screen_size.x, screen_size.y);
-    last_sense_fbo.allocate(screen_size.x, screen_size.y);
+    agent_fbo.allocate(screen_size.x, screen_size.y, GL_RGBA32F);
+    sense_fbo.allocate(screen_size.x, screen_size.y, GL_RGBA32F);
+    last_sense_fbo.allocate(screen_size.x, screen_size.y, GL_RGBA32F);
     
     
     // Clear the sense fbo
@@ -82,9 +80,10 @@ void ofApp::setup(){
             points.push_back(glm::vec2(x, y));
             
 //            std::cout << "Created point at " << x << ", " << y << " with heading " << heading << std::endl;
+            std::cout << x << ", " << y << ", " << heading << std::endl;
         }
         agent_vbo.setVertexData( &agents[0].x, 2, count, GL_DYNAMIC_DRAW, sizeof(Agent) );
-        update_fbo.allocate( count, 1 );
+        update_fbo.allocate( count, 1, GL_RGBA32F );
     }
     
     image.load("img.jpg");
@@ -97,8 +96,6 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    
-//	float blur = ofMap(mouseX, 0, ofGetWidth(), 0, 4, true);
     
     //----------------------------------------------------------
     // Draw agent
@@ -113,17 +110,11 @@ void ofApp::draw(){
     point_shader.begin();
     point_shader.setUniform2fv( "screenSize", screen_size.getPtr() );
     
-//    point_shader.setUniform1f( "senseWidth", 1. );
-    
     glPointSize( 1 );
     agent_vbo.draw( GL_POINTS, 0, points.size() );
     point_shader.end();
     
     agent_fbo.end();
-    
-    //----------------------------------------------------------
-    // Diffuse
-    //
     
     //----------------------------------------------------------
     // Store the last sense
@@ -148,8 +139,6 @@ void ofApp::draw(){
     }
 
     diffuse_shader.end();
-    
-//    agent_fbo.draw(0,0);
 
     sense_fbo.end();
     
@@ -168,7 +157,7 @@ void ofApp::draw(){
     agent_update_shader.setUniform1f( "senseAngle", 22.5 );
     agent_update_shader.setUniform1f( "rotateAngle", 45. );
     agent_update_shader.setUniform1f( "senseOffset", 9. );
-    agent_update_shader.setUniform1f( "stepSize", 1 );
+    agent_update_shader.setUniform1f( "stepSize", 0.1 );
     agent_update_shader.setUniform2fv( "screenSize", screen_size.getPtr() );
     
     {
