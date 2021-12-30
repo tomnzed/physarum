@@ -63,8 +63,9 @@ void ofApp::setup(){
         const float population = 0.15;
         
         const size_t pixels = h * w;
-        count = 10000;
-//        count = pixels * population;
+        update_fbo_width = 1000;
+        count = pixels * population;
+        count = std::floor( static_cast<float>( count ) / update_fbo_width ) * update_fbo_width;  // round it so that there is an agent per texel.
         
         agents.resize( count, {} );
         
@@ -80,13 +81,11 @@ void ofApp::setup(){
             points.push_back(glm::vec2(x, y));
             
 //            std::cout << "Created point at " << x << ", " << y << " with heading " << heading << std::endl;
-            std::cout << x << ", " << y << ", " << heading << std::endl;
+//            std::cout << x << ", " << y << ", " << heading << std::endl;
         }
         agent_vbo.setVertexData( &agents[0].x, 2, count, GL_DYNAMIC_DRAW, sizeof(Agent) );
-        update_fbo.allocate( count, 1, GL_RGBA32F );
+        update_fbo.allocate( count / update_fbo_width, update_fbo_width, GL_RGBA32F );
     }
-    
-    image.load("img.jpg");
 }
 
 //--------------------------------------------------------------
@@ -132,6 +131,9 @@ void ofApp::draw(){
     diffuse_shader.setUniformTexture("agentTexture", agent_fbo.getTexture(), 1);
     diffuse_shader.setUniformTexture("senseTexture", last_sense_fbo.getTexture(), 2);
     diffuse_shader.setUniform2fv( "screenSize", screen_size.getPtr() );
+    diffuse_shader.setUniform1f( "maxChemoAttract", 5 );  // @todo Increase this and add a final shader to display the likely dim fbo
+    diffuse_shader.setUniform1f( "depositChemoAttract", 5 );
+    diffuse_shader.setUniform1f( "chemoAttractDecayFactor", 0.1 );
 
     {
         ofRectangle rect ( 0, 0, screen_size.x, screen_size.y );
@@ -146,7 +148,7 @@ void ofApp::draw(){
     //----------------------------------------------------------
     // Update the agent positions
     // @todo: Improve the storage precision of agent positions in this texture
-    agent_texture.loadData( &agents[0].x, count, 1, GL_RGBA );
+    agent_texture.loadData( &agents[0].x, count / update_fbo_width, update_fbo_width, GL_RGBA );
 
     update_fbo.begin();
 
@@ -157,7 +159,7 @@ void ofApp::draw(){
     agent_update_shader.setUniform1f( "senseAngle", 22.5 );
     agent_update_shader.setUniform1f( "rotateAngle", 45. );
     agent_update_shader.setUniform1f( "senseOffset", 9. );
-    agent_update_shader.setUniform1f( "stepSize", 1 );
+    agent_update_shader.setUniform1f( "stepSize", 1. );
     agent_update_shader.setUniform2fv( "screenSize", screen_size.getPtr() );
     
     {
@@ -173,7 +175,6 @@ void ofApp::draw(){
 
     //----------------------------------------------------------
     
-//    agent_fbo.draw(0, 0);
     sense_fbo.draw( 0, 0 );
     
 }

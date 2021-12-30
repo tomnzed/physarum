@@ -34,6 +34,7 @@ void main()
     vec2 dir_r = vec2( sin( head_r ), cos( head_r ) );
 
     // Sense ahead
+    // @todo check texture sampling is repeating (not clamping)
     vec2 pos_a = vec2( agent.r, agent.g ) * screenSize + dir_a * senseOffset;
     float sense_a = texture( senseTexture, pos_a ).r;
 

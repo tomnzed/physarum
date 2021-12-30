@@ -9,6 +9,9 @@ out vec4 outputColor;
 uniform sampler2DRect agentTexture;
 uniform sampler2DRect senseTexture;
 uniform vec2 screenSize;
+uniform float maxChemoAttract;
+uniform float depositChemoAttract;
+uniform float chemoAttractDecayFactor;
 
 
 vec3 blur9(sampler2DRect image, vec2 uv, vec2 direction, vec2 resolution) {
@@ -45,25 +48,18 @@ vec4 blur(sampler2DRect image, vec2 resolution) {
 
 void main()
 {
-    // blur
-    
+    // diffuse the chemo attractant
     vec4 sense_tex = blur(senseTexture, screenSize );
 
-    // dissapate
-    sense_tex.rgb -= 0.005;
+    // decay
+    sense_tex.rgb *= ( 1. - chemoAttractDecayFactor );
 
-/*
-    vec2 uv = gl_FragCoord.st / screenSize;
+    // deposit from agent
     vec4 agent_tex = texture(agentTexture, gl_FragCoord.st );
-    if( agent_tex.r > 0.5 )
+    if( agent_tex.r > 0. )
     {
-        // tex = agent_tex;
-        tex = vec4( 1., 1., 1., 1.);
+        sense_tex.rgb += depositChemoAttract / maxChemoAttract;
     }
-*/
 
-    vec4 agent_tex = texture(agentTexture, gl_FragCoord.st );
-    // vec4 sense_tex = texture(senseTexture, gl_FragCoord.st );
-
-    outputColor = vec4( ( agent_tex.rgb + sense_tex.rgb ), 1. );
+    outputColor = vec4( sense_tex.rgb, 1. );
 }
