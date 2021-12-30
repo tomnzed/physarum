@@ -63,7 +63,7 @@ void ofApp::setup(){
         const float population = 0.15;
         
         const size_t pixels = h * w;
-        count = 100;
+        count = 10000;
 //        count = pixels * population;
         
         agents.resize( count, {} );
@@ -157,7 +157,7 @@ void ofApp::draw(){
     agent_update_shader.setUniform1f( "senseAngle", 22.5 );
     agent_update_shader.setUniform1f( "rotateAngle", 45. );
     agent_update_shader.setUniform1f( "senseOffset", 9. );
-    agent_update_shader.setUniform1f( "stepSize", 0.1 );
+    agent_update_shader.setUniform1f( "stepSize", 1 );
     agent_update_shader.setUniform2fv( "screenSize", screen_size.getPtr() );
     
     {
