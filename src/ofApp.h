@@ -19,7 +19,7 @@ class ofApp : public ofBaseApp{
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
 
-    ofShader agent_render_shader;
+    ofShader display_shader;
     ofShader diffuse_shader;
     ofShader agent_update_shader;
     ofShader point_shader;

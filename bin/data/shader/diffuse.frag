@@ -29,15 +29,12 @@ vec3 blur9(sampler2DRect image, vec2 uv, vec2 direction, vec2 resolution) {
 vec4 blur(sampler2DRect image, vec2 resolution) {
 
     vec2 uv = gl_FragCoord.st / resolution;
-    // Pixel colour
-    // vec3 color = texture(image, gl_FragCoord.st).rgb;
     vec3 color = vec3(0.0);
     
     // Blur calculations
     int sample_count = 0;
 
     color += blur9(image, uv, vec2(1,0), resolution);
-    // color += texture(image, gl_FragCoord.st + vec2(1,0)).rgb;
     sample_count++;
     color += blur9(image, uv, vec2(0,1), resolution);
     sample_count++;

@@ -3,6 +3,16 @@
 #include <cstdlib>
 #include <math.h>
 
+const float POPULATION = 1.0;
+const float DECAY_FACTOR = 0.2;
+const float SENSE_ANGLE = 25;
+const size_t SENSE_OFFSET = 6;
+const float ROTATE_ANGLE = 40;
+const float STEP_SIZE = 1;
+const size_t CHEMO_DEPOSIT = 1;
+const size_t MAX_CHEMO = 2;
+
+
 // R - position X
 // G - position Y
 // B - heading
@@ -42,15 +52,22 @@ void ofApp::setup(){
     diffuse_shader.load("shader/diffuse");
     agent_update_shader.load("shader/agent_update");
     point_shader.load("shader/point");
+    display_shader.load("shader/display");
     
-    screen_size = { 1280, 800 };
+    screen_size = { 640, 400 };
     
     ofSetWindowShape( screen_size.x, screen_size.y );
     
-    agent_fbo.allocate(screen_size.x, screen_size.y, GL_RGBA32F);
-    sense_fbo.allocate(screen_size.x, screen_size.y, GL_RGBA32F);
-    last_sense_fbo.allocate(screen_size.x, screen_size.y, GL_RGBA32F);
+    ofFboSettings fbo_settings;
+    fbo_settings.width = screen_size.x;
+    fbo_settings.height = screen_size.y;
+    fbo_settings.internalformat = GL_RGBA32F;
+    fbo_settings.wrapModeVertical = GL_REPEAT;
+    fbo_settings.wrapModeHorizontal = GL_REPEAT;
     
+    agent_fbo.allocate(fbo_settings);
+    sense_fbo.allocate(fbo_settings);
+    last_sense_fbo.allocate(fbo_settings);
     
     // Clear the sense fbo
     sense_fbo.begin();
@@ -60,11 +77,10 @@ void ofApp::setup(){
     {
         const size_t w = screen_size.x;
         const size_t h = screen_size.y;
-        const float population = 0.15;
         
         const size_t pixels = h * w;
         update_fbo_width = 1000;
-        count = pixels * population;
+        count = pixels * POPULATION;
         count = std::floor( static_cast<float>( count ) / update_fbo_width ) * update_fbo_width;  // round it so that there is an agent per texel.
         
         agents.resize( count, {} );
@@ -131,9 +147,9 @@ void ofApp::draw(){
     diffuse_shader.setUniformTexture("agentTexture", agent_fbo.getTexture(), 1);
     diffuse_shader.setUniformTexture("senseTexture", last_sense_fbo.getTexture(), 2);
     diffuse_shader.setUniform2fv( "screenSize", screen_size.getPtr() );
-    diffuse_shader.setUniform1f( "maxChemoAttract", 5 );  // @todo Increase this and add a final shader to display the likely dim fbo
-    diffuse_shader.setUniform1f( "depositChemoAttract", 5 );
-    diffuse_shader.setUniform1f( "chemoAttractDecayFactor", 0.1 );
+    diffuse_shader.setUniform1f( "maxChemoAttract", MAX_CHEMO );  // @todo Increase this and add a final shader to display the likely dim fbo
+    diffuse_shader.setUniform1f( "depositChemoAttract", CHEMO_DEPOSIT );
+    diffuse_shader.setUniform1f( "chemoAttractDecayFactor", DECAY_FACTOR );
 
     {
         ofRectangle rect ( 0, 0, screen_size.x, screen_size.y );
@@ -156,10 +172,10 @@ void ofApp::draw(){
     agent_update_shader.setUniformTexture("agentTexture", agent_texture, 1);
     agent_update_shader.setUniformTexture("senseTexture", last_sense_fbo.getTexture(), 2);
     
-    agent_update_shader.setUniform1f( "senseAngle", 22.5 );
-    agent_update_shader.setUniform1f( "rotateAngle", 45. );
-    agent_update_shader.setUniform1f( "senseOffset", 9. );
-    agent_update_shader.setUniform1f( "stepSize", 1. );
+    agent_update_shader.setUniform1f( "senseAngle", SENSE_ANGLE );
+    agent_update_shader.setUniform1f( "rotateAngle", ROTATE_ANGLE );
+    agent_update_shader.setUniform1f( "senseOffset", SENSE_OFFSET );
+    agent_update_shader.setUniform1f( "stepSize", STEP_SIZE );
     agent_update_shader.setUniform2fv( "screenSize", screen_size.getPtr() );
     
     {
@@ -175,7 +191,17 @@ void ofApp::draw(){
 
     //----------------------------------------------------------
     
-    sense_fbo.draw( 0, 0 );
+    display_shader.begin();
+    display_shader.setUniformTexture("senseTexture", sense_fbo.getTexture(), 2);
+    display_shader.setUniform1f( "maxChemoAttract", MAX_CHEMO );
+    display_shader.setUniform1f( "depositChemoAttract", CHEMO_DEPOSIT );
+    
+    {
+        ofRectangle rect ( 0, 0, screen_size.x, screen_size.y );
+        ofDrawRectangle( rect );
+    }
+    
+    display_shader.end();
     
 }
 
