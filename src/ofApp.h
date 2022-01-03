@@ -40,7 +40,6 @@ class ofApp : public ofBaseApp{
         float _padding;  // For copying RGBA data to this
     };
     std::vector<Agent> agents;
-    std::vector<glm::vec2> points;
     size_t count;
     size_t update_fbo_width;  // Used to not exceed the fbo dimensions.
 };

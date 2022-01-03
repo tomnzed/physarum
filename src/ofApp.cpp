@@ -13,32 +13,6 @@ const size_t CHEMO_DEPOSIT = 1;
 const size_t MAX_CHEMO = 2;
 
 
-// R - position X
-// G - position Y
-// B - heading
-// A - state
-ofTexture create_initial_agents( const size_t w, const size_t h, const float population = 0.6 )
-{
-    ofTexture texture;
-    
-    std::vector<float> data;
-    data.resize( w * h * 4, 0.0 );
-    
-    const size_t pixels = h * w;
-    
-    for( size_t i = 0; i < pixels * population; ++i )
-    {
-        data[ i * 4 ]     = static_cast<float>( std::rand() ) / RAND_MAX * w;
-        data[ i * 4 + 1 ] = static_cast<float>( std::rand() ) / RAND_MAX * h;
-        data[ i * 4 + 2 ] = static_cast<float>( std::rand() ) / RAND_MAX;
-        data[ i * 4 + 3 ] = 1.0;  // alive
-    }
-    
-    texture.loadData( data.data(), w, h, GL_RGBA );
-    return texture;
-}
-
-
 //--------------------------------------------------------------
 void ofApp::setup(){
     
@@ -94,8 +68,6 @@ void ofApp::setup(){
             agents[ i ].y = y;
             agents[ i ].heading = heading;
             
-            points.push_back(glm::vec2(x, y));
-            
 //            std::cout << "Created point at " << x << ", " << y << " with heading " << heading << std::endl;
 //            std::cout << x << ", " << y << ", " << heading << std::endl;
         }
@@ -126,7 +98,7 @@ void ofApp::draw(){
     point_shader.setUniform2fv( "screenSize", screen_size.getPtr() );
     
     glPointSize( 1 );
-    agent_vbo.draw( GL_POINTS, 0, points.size() );
+    agent_vbo.draw( GL_POINTS, 0, agents.size() );
     point_shader.end();
     
     agent_fbo.end();
