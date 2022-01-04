@@ -2,8 +2,8 @@
 
 uniform sampler2DRect senseTexture;
 uniform float blurAmnt;
-uniform float maxChemoAttract;
-uniform float depositChemoAttract;
+uniform float normalX;
+uniform float normalY;
 
 in vec2 texCoordVarying;
 in vec4 vertColour;
@@ -13,13 +13,8 @@ void main()
 {
     vec4 chemo = texture( senseTexture, gl_FragCoord.st);
 
-
-    if( maxChemoAttract != depositChemoAttract )
+    if( normalX != normalY )
     {
-        float normalX = depositChemoAttract / maxChemoAttract;
-
-        float normalY = 0.6;
-
         // This seems to just make everything display as greyer if maxChemoAttract is much bigger than 1 or 2 x depositChemoAttract. 
         if( chemo.r > normalX )
         {

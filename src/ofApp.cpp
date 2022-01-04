@@ -3,14 +3,17 @@
 #include <cstdlib>
 #include <math.h>
 
-const float POPULATION = 1.0;
-const float DECAY_FACTOR = 0.2;
-const float SENSE_ANGLE = 25;
-const size_t SENSE_OFFSET = 6;
-const float ROTATE_ANGLE = 40;
+const float POPULATION = 0.25;
+const float DECAY_FACTOR = 0.08;
+const float SENSE_ANGLE = 30;
+const size_t SENSE_OFFSET = 2;
+const float ROTATE_ANGLE = 55;
 const float STEP_SIZE = 1;
 const size_t CHEMO_DEPOSIT = 1;
-const size_t MAX_CHEMO = 2;
+const size_t MAX_CHEMO = 5;
+
+const float DISPLAY_NORMAL_X = 0.4;
+const float DISPLAY_NORMAL_Y = 0.6;
 
 
 //--------------------------------------------------------------
@@ -28,7 +31,7 @@ void ofApp::setup(){
     point_shader.load("shader/point");
     display_shader.load("shader/display");
     
-    screen_size = { 640, 400 };
+    screen_size = { 1280, 800 };
     
     ofSetWindowShape( screen_size.x, screen_size.y );
     
@@ -61,8 +64,14 @@ void ofApp::setup(){
         
         for( size_t i = 0; i < count; ++i )
         {
-            auto x = static_cast<float>( std::rand() ) / RAND_MAX;
-            auto y = static_cast<float>( std::rand() ) / RAND_MAX;
+            auto angle = static_cast<float>( std::rand() ) / RAND_MAX * M_PI * 2;
+            auto r = static_cast<float>( std::rand() ) / RAND_MAX;
+            
+            auto x = sin( angle ) * r * 0.25 + 0.5;
+            auto y = cos( angle ) * r * 0.25 + 0.5;
+//            auto heading = angle / ( M_PI * 2 );
+//            auto x = static_cast<float>( std::rand() ) / RAND_MAX;
+//            auto y = static_cast<float>( std::rand() ) / RAND_MAX;
             auto heading = static_cast<float>( std::rand() ) / RAND_MAX;
             agents[ i ].x = x;
             agents[ i ].y = y;
@@ -165,8 +174,8 @@ void ofApp::draw(){
     
     display_shader.begin();
     display_shader.setUniformTexture("senseTexture", sense_fbo.getTexture(), 2);
-    display_shader.setUniform1f( "maxChemoAttract", MAX_CHEMO );
-    display_shader.setUniform1f( "depositChemoAttract", CHEMO_DEPOSIT );
+    display_shader.setUniform1f( "normalX", DISPLAY_NORMAL_X );
+    display_shader.setUniform1f( "normalY", DISPLAY_NORMAL_Y );
     
     {
         ofRectangle rect ( 0, 0, screen_size.x, screen_size.y );
