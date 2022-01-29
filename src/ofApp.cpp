@@ -1,12 +1,14 @@
 #include "ofApp.h"
 
 #include <cstdlib>
+#include <ctime>
+#include <chrono>
 #include <math.h>
 
 const float POPULATION = 0.25;
-const float DECAY_FACTOR = 0.08;
+const float DECAY_FACTOR = 0.15;
 const float SENSE_ANGLE = 30;
-const size_t SENSE_OFFSET = 2;
+const size_t SENSE_OFFSET = 3;
 const float ROTATE_ANGLE = 55;
 const float STEP_SIZE = 1;
 const size_t CHEMO_DEPOSIT = 1;
@@ -15,6 +17,17 @@ const size_t MAX_CHEMO = 5;
 const float DISPLAY_NORMAL_X = 0.4;
 const float DISPLAY_NORMAL_Y = 0.6;
 
+
+const double ofApp::RenderTimes:: UPDATE_RATE = 0.01;
+
+std::ostream& operator<<( std::ostream& os, const ofApp::RenderTimes& times )
+{
+    return os
+        << "Agent vbo = " << times.agent_vbo / std::chrono::milliseconds( 1 ) << "ms, "
+        << "current sense = " << times.draw_current_sense / std::chrono::milliseconds( 1 ) << "ms, "
+        << "update agents = " << times.update_agents / std::chrono::milliseconds( 1 ) << "ms, "
+        << "draw = " << times.draw_to_screen / std::chrono::milliseconds( 1 ) << "ms, ";
+}
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -83,6 +96,10 @@ void ofApp::setup(){
         agent_vbo.setVertexData( &agents[0].x, 2, count, GL_DYNAMIC_DRAW, sizeof(Agent) );
         update_fbo.allocate( count / update_fbo_width, update_fbo_width, GL_RGBA32F );
     }
+    
+    const GLubyte* renderer = glGetString(GL_RENDERER);
+    
+    std::cout << "Using renderer " << renderer << std::endl;
 }
 
 //--------------------------------------------------------------
@@ -92,6 +109,8 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
+    
+    auto start = std::chrono::steady_clock::now();
     
     //----------------------------------------------------------
     // Draw agent
@@ -111,6 +130,10 @@ void ofApp::draw(){
     point_shader.end();
     
     agent_fbo.end();
+    
+    auto end = std::chrono::steady_clock::now();
+    mRenderTimes.update_agent_vbo( end - start );
+    start = end;
     
     //----------------------------------------------------------
     // Store the last sense
@@ -141,6 +164,10 @@ void ofApp::draw(){
 
     sense_fbo.end();
     
+    end = std::chrono::steady_clock::now();
+    mRenderTimes.update_draw_current_sense( end - start );
+    start = end;
+    
     
     //----------------------------------------------------------
     // Update the agent positions
@@ -170,7 +197,12 @@ void ofApp::draw(){
     update_fbo.getTexture().readToPixels( pixels );
     std::copy( pixels.getData(), pixels.getData() + pixels.size(), &agents[0].x );
 
+    end = std::chrono::steady_clock::now();
+    mRenderTimes.update_agent_vbo( end - start );
+    start = end;
+    
     //----------------------------------------------------------
+    // Draw to screen
     
     display_shader.begin();
     display_shader.setUniformTexture("senseTexture", sense_fbo.getTexture(), 2);
@@ -183,6 +215,24 @@ void ofApp::draw(){
     }
     
     display_shader.end();
+    
+    end = std::chrono::steady_clock::now();
+    mRenderTimes.update_draw_to_screen( end - start );
+    start = end;
+    
+    auto as_seconds = []( std::chrono::steady_clock::time_point t )
+    {
+        return std::chrono::duration_cast<std::chrono::seconds>( t.time_since_epoch() ).count();
+    };
+    
+    
+    using Sec = std::chrono::seconds;
+    if( as_seconds( mLastFrameTime ) != as_seconds( std::chrono::steady_clock::now() ) )
+    {
+        std::cout << mRenderTimes << std::endl;
+    }
+    
+    mLastFrameTime = std::chrono::steady_clock::now();
     
 }
 
