@@ -198,7 +198,7 @@ void ofApp::draw(){
     std::copy( pixels.getData(), pixels.getData() + pixels.size(), &agents[0].x );
 
     end = std::chrono::steady_clock::now();
-    mRenderTimes.update_agent_vbo( end - start );
+    mRenderTimes.update_update_agents( end - start );
     start = end;
     
     //----------------------------------------------------------
