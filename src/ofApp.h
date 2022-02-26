@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxPixelBuffer.h"
 
 class ofApp : public ofBaseApp{
 	public:
@@ -27,6 +28,7 @@ class ofApp : public ofBaseApp{
     ofFbo sense_fbo;
     ofFbo last_sense_fbo;
     ofFbo update_fbo;
+    ofxPixelBufferFloat update_pbo;
     ofVbo agent_vbo;
     ofImage image;
     ofTexture agent_texture;
@@ -51,6 +53,7 @@ class ofApp : public ofBaseApp{
         std::chrono::duration<double> draw_current_sense;
         std::chrono::duration<double> update_agents;
         std::chrono::duration<double> draw_to_screen;
+        std::chrono::duration<double> test_time;
         
         friend std::ostream& operator<<( std::ostream& os, const RenderTimes& times );
         
@@ -72,6 +75,11 @@ class ofApp : public ofBaseApp{
         void update_draw_to_screen( std::chrono::duration<double> time )
         {
             draw_to_screen = draw_to_screen * ( 1. - UPDATE_RATE ) + time * UPDATE_RATE;
+        }
+        
+        void update_test_time( std::chrono::duration<double> time )
+        {
+            test_time = test_time * ( 1. - UPDATE_RATE ) + time * UPDATE_RATE;
         }
     };
     

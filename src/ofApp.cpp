@@ -5,11 +5,11 @@
 #include <chrono>
 #include <math.h>
 
-const float POPULATION = 0.25;
+const float POPULATION = 0.5;
 const float DECAY_FACTOR = 0.15;
-const float SENSE_ANGLE = 30;
+const float SENSE_ANGLE = 15;
 const size_t SENSE_OFFSET = 3;
-const float ROTATE_ANGLE = 55;
+const float ROTATE_ANGLE = 30;
 const float STEP_SIZE = 1;
 const size_t CHEMO_DEPOSIT = 1;
 const size_t MAX_CHEMO = 5;
@@ -17,6 +17,15 @@ const size_t MAX_CHEMO = 5;
 const float DISPLAY_NORMAL_X = 0.4;
 const float DISPLAY_NORMAL_Y = 0.6;
 
+
+std::ofstream log_error(const char* file, size_t line, const std::string & message )
+{
+    std::stringstream ss;
+    ss << file << ":" << line << " - " << message;
+    ofLogError( "ofApp", ss.str() );
+}
+
+#define LOG_ERROR(x) log_error(__FILE__,__LINE__,x)
 
 const double ofApp::RenderTimes:: UPDATE_RATE = 0.01;
 
@@ -26,7 +35,8 @@ std::ostream& operator<<( std::ostream& os, const ofApp::RenderTimes& times )
         << "Agent vbo = " << times.agent_vbo / std::chrono::milliseconds( 1 ) << "ms, "
         << "current sense = " << times.draw_current_sense / std::chrono::milliseconds( 1 ) << "ms, "
         << "update agents = " << times.update_agents / std::chrono::milliseconds( 1 ) << "ms, "
-        << "draw = " << times.draw_to_screen / std::chrono::milliseconds( 1 ) << "ms, ";
+        << "draw = " << times.draw_to_screen / std::chrono::milliseconds( 1 ) << "ms, "
+        << "test = " << times.test_time / std::chrono::milliseconds( 1 ) << "ms, ";
 }
 
 //--------------------------------------------------------------
@@ -34,6 +44,11 @@ void ofApp::setup(){
     
     srand(20);
     
+    
+    int err = glGetError();
+    if (err != GL_NO_ERROR) {
+        LOG_ERROR( ofToString(gluErrorString(err)));
+    }
     
     ofBackgroundHex(0x57554c);
     ofSetFrameRate(60);
@@ -52,12 +67,28 @@ void ofApp::setup(){
     fbo_settings.width = screen_size.x;
     fbo_settings.height = screen_size.y;
     fbo_settings.internalformat = GL_RGBA32F;
-    fbo_settings.wrapModeVertical = GL_REPEAT;
-    fbo_settings.wrapModeHorizontal = GL_REPEAT;
+    
+    err = glGetError();
+    if (err != GL_NO_ERROR) {
+        LOG_ERROR( ofToString(gluErrorString(err)));
+    }
     
     agent_fbo.allocate(fbo_settings);
+    err = glGetError();
+    if (err != GL_NO_ERROR) {
+        LOG_ERROR( ofToString(gluErrorString(err)));
+    }
     sense_fbo.allocate(fbo_settings);
+    err = glGetError();
+    if (err != GL_NO_ERROR) {
+        LOG_ERROR( ofToString(gluErrorString(err)));
+    }
     last_sense_fbo.allocate(fbo_settings);
+    
+    err = glGetError();
+    if (err != GL_NO_ERROR) {
+        LOG_ERROR( ofToString(gluErrorString(err)));
+    }
     
     // Clear the sense fbo
     sense_fbo.begin();
@@ -93,8 +124,10 @@ void ofApp::setup(){
 //            std::cout << "Created point at " << x << ", " << y << " with heading " << heading << std::endl;
 //            std::cout << x << ", " << y << ", " << heading << std::endl;
         }
+        
         agent_vbo.setVertexData( &agents[0].x, 2, count, GL_DYNAMIC_DRAW, sizeof(Agent) );
         update_fbo.allocate( count / update_fbo_width, update_fbo_width, GL_RGBA32F );
+        update_pbo.allocate( count / update_fbo_width, update_fbo_width, GL_RGBA, GL_DYNAMIC_READ );
     }
     
     const GLubyte* renderer = glGetString(GL_RENDERER);
@@ -192,10 +225,13 @@ void ofApp::draw(){
     }
     agent_update_shader.end();
     update_fbo.end();
-
-    ofPixels_<float> pixels;
-    update_fbo.getTexture().readToPixels( pixels );
-    std::copy( pixels.getData(), pixels.getData() + pixels.size(), &agents[0].x );
+    
+    mRenderTimes.update_test_time( std::chrono::steady_clock::now() - start );
+    
+    update_pbo.readPixels( update_fbo );
+    auto gpu_memory = update_pbo.map( GL_PIXEL_PACK_BUFFER, GL_READ_ONLY );
+    std::copy( gpu_memory, gpu_memory + agents.size() * sizeof(Agent) / sizeof(float), &agents[0].x );
+    update_pbo.unmap( GL_PIXEL_PACK_BUFFER );
 
     end = std::chrono::steady_clock::now();
     mRenderTimes.update_update_agents( end - start );
