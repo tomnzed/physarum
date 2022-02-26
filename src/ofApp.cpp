@@ -148,6 +148,7 @@ void ofApp::draw(){
     //----------------------------------------------------------
     // Draw agent
     //
+    // @todo: Set this from the PBO so to not require the data on the CPU.
     agent_vbo.setVertexData( &agents[0].x, 2, count, GL_DYNAMIC_DRAW, sizeof(Agent) );
     agent_fbo.begin();
     ofClear(0, 0, 0);
@@ -204,7 +205,7 @@ void ofApp::draw(){
     
     //----------------------------------------------------------
     // Update the agent positions
-    // @todo: Improve the storage precision of agent positions in this texture
+    // @todo: Set this from the PBO so to not require the data on the CPU.
     agent_texture.loadData( &agents[0].x, count / update_fbo_width, update_fbo_width, GL_RGBA );
 
     update_fbo.begin();
