@@ -8,7 +8,13 @@ class ofApp : public ofBaseApp{
 		
 	void setup();
 	void update();
-	void draw();
+    
+    void DrawPrettySense();
+    void DrawAgents();
+    void DrawSense();
+    void UpdateAgentPositions();
+    
+    void draw();
 	
 	void keyPressed(int key);
 	void keyReleased(int key);
@@ -85,4 +91,5 @@ class ofApp : public ofBaseApp{
     
     RenderTimes mRenderTimes;
     std::chrono::steady_clock::time_point mLastFrameTime;
+    bool mRunning = true;
 };

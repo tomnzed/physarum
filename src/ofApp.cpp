@@ -140,28 +140,103 @@ void ofApp::update(){
 
 }
 
-//--------------------------------------------------------------
-void ofApp::draw(){
+void ofApp::DrawPrettySense()
+{
+    display_shader.begin();
+    display_shader.setUniformTexture("senseTexture", sense_fbo.getTexture(), 2);
+    display_shader.setUniform1f( "normalX", DISPLAY_NORMAL_X );
+    display_shader.setUniform1f( "normalY", DISPLAY_NORMAL_Y );
     
-    auto start = std::chrono::steady_clock::now();
+    {
+        ofRectangle rect ( 0, 0, screen_size.x, screen_size.y );
+        ofDrawRectangle( rect );
+    }
     
-    //----------------------------------------------------------
-    // Draw agent
-    //
-    // @todo: Set this from the PBO so to not require the data on the CPU.
+    display_shader.end();
+}
+
+void ofApp::DrawAgents()
+{
     agent_vbo.setVertexData( &agents[0].x, 2, count, GL_DYNAMIC_DRAW, sizeof(Agent) );
-    agent_fbo.begin();
     ofClear(0, 0, 0);
     
     ofSetColor(255);
     
-    // @todo figure out how to map these from norm coords to abs and draw properly :)
     point_shader.begin();
     point_shader.setUniform2fv( "screenSize", screen_size.getPtr() );
     
     glPointSize( 1 );
     agent_vbo.draw( GL_POINTS, 0, agents.size() );
     point_shader.end();
+}
+
+void ofApp::DrawSense()
+{
+    ofClear(0, 0, 0);
+    
+    diffuse_shader.begin();
+    diffuse_shader.setUniformTexture("agentTexture", agent_fbo.getTexture(), 1);
+    diffuse_shader.setUniformTexture("senseTexture", last_sense_fbo.getTexture(), 2);
+    diffuse_shader.setUniform2fv( "screenSize", screen_size.getPtr() );
+    diffuse_shader.setUniform1f( "maxChemoAttract", MAX_CHEMO );  // @todo Increase this and add a final shader to display the likely dim fbo
+    diffuse_shader.setUniform1f( "depositChemoAttract", CHEMO_DEPOSIT );
+    diffuse_shader.setUniform1f( "chemoAttractDecayFactor", DECAY_FACTOR );
+    
+    {
+        ofRectangle rect ( 0, 0, screen_size.x, screen_size.y );
+        ofDrawRectangle( rect );
+    }
+    
+    diffuse_shader.end();
+}
+
+void ofApp::UpdateAgentPositions()
+{
+    update_fbo.begin();
+    
+    // @todo: Set this from the PBO so to not require the data on the CPU.
+    agent_texture.loadData( &agents[0].x, count / update_fbo_width, update_fbo_width, GL_RGBA );
+    agent_update_shader.begin();
+    agent_update_shader.setUniformTexture("agentTexture", agent_texture, 1);
+    agent_update_shader.setUniformTexture("senseTexture", last_sense_fbo.getTexture(), 2);
+    
+    agent_update_shader.setUniform1f( "senseAngle", SENSE_ANGLE );
+    agent_update_shader.setUniform1f( "rotateAngle", ROTATE_ANGLE );
+    agent_update_shader.setUniform1f( "senseOffset", SENSE_OFFSET );
+    agent_update_shader.setUniform1f( "stepSize", STEP_SIZE );
+    agent_update_shader.setUniform2fv( "screenSize", screen_size.getPtr() );
+    
+    {
+        ofRectangle rect ( 0, 0, update_fbo.getWidth(), update_fbo.getHeight() );
+        ofDrawRectangle( rect );
+    }
+    agent_update_shader.end();
+    
+    update_fbo.end();
+    
+    update_pbo.readPixels( update_fbo );
+    auto gpu_memory = update_pbo.map( GL_PIXEL_PACK_BUFFER, GL_READ_ONLY );
+    std::copy( gpu_memory, gpu_memory + agents.size() * sizeof(Agent) / sizeof(float), &agents[0].x );
+    update_pbo.unmap( GL_PIXEL_PACK_BUFFER );
+}
+
+//--------------------------------------------------------------
+void ofApp::draw(){
+    
+    if( !mRunning )
+    {
+        DrawPrettySense();
+        return;
+    }
+    
+    auto start = std::chrono::steady_clock::now();
+    
+    //----------------------------------------------------------
+    // Draw agents
+    //
+    // @todo: Set this from the PBO so to not require the data on the CPU.
+    agent_fbo.begin();
+    DrawAgents();
     
     agent_fbo.end();
     
@@ -179,23 +254,7 @@ void ofApp::draw(){
     //----------------------------------------------------------
     // Create the current sense
     sense_fbo.begin();
-    ofClear(0, 0, 0);
-
-    diffuse_shader.begin();
-    diffuse_shader.setUniformTexture("agentTexture", agent_fbo.getTexture(), 1);
-    diffuse_shader.setUniformTexture("senseTexture", last_sense_fbo.getTexture(), 2);
-    diffuse_shader.setUniform2fv( "screenSize", screen_size.getPtr() );
-    diffuse_shader.setUniform1f( "maxChemoAttract", MAX_CHEMO );  // @todo Increase this and add a final shader to display the likely dim fbo
-    diffuse_shader.setUniform1f( "depositChemoAttract", CHEMO_DEPOSIT );
-    diffuse_shader.setUniform1f( "chemoAttractDecayFactor", DECAY_FACTOR );
-
-    {
-        ofRectangle rect ( 0, 0, screen_size.x, screen_size.y );
-        ofDrawRectangle( rect );
-    }
-
-    diffuse_shader.end();
-
+    DrawSense();
     sense_fbo.end();
     
     end = std::chrono::steady_clock::now();
@@ -205,34 +264,7 @@ void ofApp::draw(){
     
     //----------------------------------------------------------
     // Update the agent positions
-    // @todo: Set this from the PBO so to not require the data on the CPU.
-    agent_texture.loadData( &agents[0].x, count / update_fbo_width, update_fbo_width, GL_RGBA );
-
-    update_fbo.begin();
-
-    agent_update_shader.begin();
-    agent_update_shader.setUniformTexture("agentTexture", agent_texture, 1);
-    agent_update_shader.setUniformTexture("senseTexture", last_sense_fbo.getTexture(), 2);
-    
-    agent_update_shader.setUniform1f( "senseAngle", SENSE_ANGLE );
-    agent_update_shader.setUniform1f( "rotateAngle", ROTATE_ANGLE );
-    agent_update_shader.setUniform1f( "senseOffset", SENSE_OFFSET );
-    agent_update_shader.setUniform1f( "stepSize", STEP_SIZE );
-    agent_update_shader.setUniform2fv( "screenSize", screen_size.getPtr() );
-    
-    {
-        ofRectangle rect ( 0, 0, update_fbo.getWidth(), update_fbo.getHeight() );
-        ofDrawRectangle( rect );
-    }
-    agent_update_shader.end();
-    update_fbo.end();
-    
-    mRenderTimes.update_test_time( std::chrono::steady_clock::now() - start );
-    
-    update_pbo.readPixels( update_fbo );
-    auto gpu_memory = update_pbo.map( GL_PIXEL_PACK_BUFFER, GL_READ_ONLY );
-    std::copy( gpu_memory, gpu_memory + agents.size() * sizeof(Agent) / sizeof(float), &agents[0].x );
-    update_pbo.unmap( GL_PIXEL_PACK_BUFFER );
+    UpdateAgentPositions();
 
     end = std::chrono::steady_clock::now();
     mRenderTimes.update_update_agents( end - start );
@@ -240,18 +272,7 @@ void ofApp::draw(){
     
     //----------------------------------------------------------
     // Draw to screen
-    
-    display_shader.begin();
-    display_shader.setUniformTexture("senseTexture", sense_fbo.getTexture(), 2);
-    display_shader.setUniform1f( "normalX", DISPLAY_NORMAL_X );
-    display_shader.setUniform1f( "normalY", DISPLAY_NORMAL_Y );
-    
-    {
-        ofRectangle rect ( 0, 0, screen_size.x, screen_size.y );
-        ofDrawRectangle( rect );
-    }
-    
-    display_shader.end();
+    DrawPrettySense();
     
     end = std::chrono::steady_clock::now();
     mRenderTimes.update_draw_to_screen( end - start );
@@ -262,8 +283,6 @@ void ofApp::draw(){
         return std::chrono::duration_cast<std::chrono::seconds>( t.time_since_epoch() ).count();
     };
     
-    
-    using Sec = std::chrono::seconds;
     if( as_seconds( mLastFrameTime ) != as_seconds( std::chrono::steady_clock::now() ) )
     {
         std::cout << mRenderTimes << std::endl;
@@ -275,7 +294,12 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-    
+    switch( key )
+    {
+        case ' ':
+            mRunning = !mRunning;
+            break;
+    }
 }
 
 //--------------------------------------------------------------
