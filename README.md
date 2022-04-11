@@ -1,3 +1,3 @@
 # Physarum simulation using shaders
 
-WIP
+![image](physarum.png?raw=true)
