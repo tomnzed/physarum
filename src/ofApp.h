@@ -55,38 +55,46 @@ class ofApp : public ofBaseApp{
     {
         static const double UPDATE_RATE;
         
-        std::chrono::duration<double> agent_vbo;
-        std::chrono::duration<double> draw_current_sense;
-        std::chrono::duration<double> update_agents;
-        std::chrono::duration<double> draw_to_screen;
-        std::chrono::duration<double> test_time;
+        struct Timer
+        {
+            using DurationCb = std::function<void(std::chrono::duration<double>)>;
+            Timer( DurationCb duration_cb )
+                : mDurationCb( duration_cb )
+                , mStart( std::chrono::steady_clock::now() )
+            {}
+            
+            ~Timer()
+            {
+                auto duration = std::chrono::steady_clock::now() - mStart;
+                mDurationCb( duration );
+            }
+            
+            DurationCb mDurationCb;
+            std::chrono::steady_clock::time_point mStart;
+        };
+        
+        struct TrackedTime
+        {
+            void AddDuration(  std::chrono::duration<double> time )
+            {
+                duration = duration * ( 1. - UPDATE_RATE ) + time * UPDATE_RATE;
+            }
+            
+            Timer TimeThisScope()
+            {
+                using namespace std::placeholders;
+                return Timer( std::bind( &TrackedTime::AddDuration, this, _1 ) );
+            }
+            
+            std::chrono::duration<double> duration;
+        };
+        
+        TrackedTime agent_vbo;
+        TrackedTime draw_current_sense;
+        TrackedTime update_agents;
+        TrackedTime draw_to_screen;
         
         friend std::ostream& operator<<( std::ostream& os, const RenderTimes& times );
-        
-        void update_agent_vbo( std::chrono::duration<double> time )
-        {
-            agent_vbo = agent_vbo * ( 1. - UPDATE_RATE ) + time * UPDATE_RATE;
-        }
-        
-        void update_draw_current_sense( std::chrono::duration<double> time )
-        {
-            draw_current_sense = draw_current_sense * ( 1. - UPDATE_RATE ) + time * UPDATE_RATE;
-        }
-        
-        void update_update_agents( std::chrono::duration<double> time )
-        {
-            update_agents = update_agents * ( 1. - UPDATE_RATE ) + time * UPDATE_RATE;
-        }
-        
-        void update_draw_to_screen( std::chrono::duration<double> time )
-        {
-            draw_to_screen = draw_to_screen * ( 1. - UPDATE_RATE ) + time * UPDATE_RATE;
-        }
-        
-        void update_test_time( std::chrono::duration<double> time )
-        {
-            test_time = test_time * ( 1. - UPDATE_RATE ) + time * UPDATE_RATE;
-        }
     };
     
     RenderTimes mRenderTimes;

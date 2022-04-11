@@ -32,11 +32,10 @@ const double ofApp::RenderTimes:: UPDATE_RATE = 0.01;
 std::ostream& operator<<( std::ostream& os, const ofApp::RenderTimes& times )
 {
     return os
-        << "Agent vbo = " << times.agent_vbo / std::chrono::milliseconds( 1 ) << "ms, "
-        << "current sense = " << times.draw_current_sense / std::chrono::milliseconds( 1 ) << "ms, "
-        << "update agents = " << times.update_agents / std::chrono::milliseconds( 1 ) << "ms, "
-        << "draw = " << times.draw_to_screen / std::chrono::milliseconds( 1 ) << "ms, "
-        << "test = " << times.test_time / std::chrono::milliseconds( 1 ) << "ms, ";
+        << "Agent vbo = " << times.agent_vbo.duration / std::chrono::milliseconds( 1 ) << "ms, "
+        << "current sense = " << times.draw_current_sense.duration / std::chrono::milliseconds( 1 ) << "ms, "
+        << "update agents = " << times.update_agents.duration / std::chrono::milliseconds( 1 ) << "ms, "
+        << "draw = " << times.draw_to_screen.duration / std::chrono::milliseconds( 1 ) << "ms";
 }
 
 //--------------------------------------------------------------
@@ -142,6 +141,8 @@ void ofApp::update(){
 
 void ofApp::DrawPrettySense()
 {
+    auto timer = mRenderTimes.draw_to_screen.TimeThisScope();
+    
     display_shader.begin();
     display_shader.setUniformTexture("senseTexture", sense_fbo.getTexture(), 2);
     display_shader.setUniform1f( "normalX", DISPLAY_NORMAL_X );
@@ -157,6 +158,8 @@ void ofApp::DrawPrettySense()
 
 void ofApp::DrawAgents()
 {
+    auto timer = mRenderTimes.agent_vbo.TimeThisScope();
+    
     agent_vbo.setVertexData( &agents[0].x, 2, count, GL_DYNAMIC_DRAW, sizeof(Agent) );
     ofClear(0, 0, 0);
     
@@ -172,6 +175,8 @@ void ofApp::DrawAgents()
 
 void ofApp::DrawSense()
 {
+    auto timer = mRenderTimes.draw_current_sense.TimeThisScope();
+    
     ofClear(0, 0, 0);
     
     diffuse_shader.begin();
@@ -192,6 +197,8 @@ void ofApp::DrawSense()
 
 void ofApp::UpdateAgentPositions()
 {
+    auto timer = mRenderTimes.update_agents.TimeThisScope();
+    
     update_fbo.begin();
     
     // @todo: Set this from the PBO so to not require the data on the CPU.
@@ -229,20 +236,11 @@ void ofApp::draw(){
         return;
     }
     
-    auto start = std::chrono::steady_clock::now();
-    
     //----------------------------------------------------------
     // Draw agents
-    //
-    // @todo: Set this from the PBO so to not require the data on the CPU.
     agent_fbo.begin();
     DrawAgents();
-    
     agent_fbo.end();
-    
-    auto end = std::chrono::steady_clock::now();
-    mRenderTimes.update_agent_vbo( end - start );
-    start = end;
     
     //----------------------------------------------------------
     // Store the last sense
@@ -257,26 +255,13 @@ void ofApp::draw(){
     DrawSense();
     sense_fbo.end();
     
-    end = std::chrono::steady_clock::now();
-    mRenderTimes.update_draw_current_sense( end - start );
-    start = end;
-    
-    
     //----------------------------------------------------------
     // Update the agent positions
     UpdateAgentPositions();
-
-    end = std::chrono::steady_clock::now();
-    mRenderTimes.update_update_agents( end - start );
-    start = end;
     
     //----------------------------------------------------------
     // Draw to screen
     DrawPrettySense();
-    
-    end = std::chrono::steady_clock::now();
-    mRenderTimes.update_draw_to_screen( end - start );
-    start = end;
     
     auto as_seconds = []( std::chrono::steady_clock::time_point t )
     {
