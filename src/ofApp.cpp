@@ -135,8 +135,29 @@ void ofApp::setup(){
 }
 
 //--------------------------------------------------------------
-void ofApp::update(){
+void ofApp::update()
+{
 
+    if( mSaveNextFrame )
+    {
+        mSaveNextFrame = false;
+        
+        int w = sense_fbo.getWidth();
+        int h = sense_fbo.getHeight();
+        ofPixels pixels;
+        pixels.allocate( w, h, 4 );
+        sense_fbo.readToPixels( pixels );
+        
+        ofImage image;
+        image.allocate( w, h, ofImageType::OF_IMAGE_COLOR_ALPHA );
+        image.setFromPixels( pixels );
+        
+        const std::string filename{ "sense.png" };
+        image.save( filename );
+        
+        std::cout << "Saved image " << filename;
+    }
+    
 }
 
 void ofApp::DrawPrettySense()
@@ -283,6 +304,10 @@ void ofApp::keyPressed(int key){
     {
         case ' ':
             mRunning = !mRunning;
+            break;
+            
+        case 'c':
+            mSaveNextFrame = true;
             break;
     }
 }

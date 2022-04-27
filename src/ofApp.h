@@ -100,4 +100,5 @@ class ofApp : public ofBaseApp{
     RenderTimes mRenderTimes;
     std::chrono::steady_clock::time_point mLastFrameTime;
     bool mRunning = true;
+    bool mSaveNextFrame = false;
 };
