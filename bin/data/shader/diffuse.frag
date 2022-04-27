@@ -8,7 +8,7 @@ out vec4 outputColor;
 
 uniform sampler2DRect agentTexture;
 uniform sampler2DRect senseTexture;
-uniform vec2 screenSize;
+uniform vec2 simSize;
 uniform float maxChemoAttract;
 uniform float depositChemoAttract;
 uniform float chemoAttractDecayFactor;
@@ -46,7 +46,7 @@ vec4 blur(sampler2DRect image, vec2 resolution) {
 void main()
 {
     // diffuse the chemo attractant
-    vec4 sense_tex = blur(senseTexture, screenSize );
+    vec4 sense_tex = blur(senseTexture, simSize );
 
     // decay
     sense_tex.rgb *= ( 1. - chemoAttractDecayFactor );

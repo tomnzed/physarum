@@ -9,7 +9,7 @@ out vec4 outputColor;
 uniform sampler2DRect agentTexture;  // Texture to update the agent positions using
 
 uniform sampler2DRect senseTexture;  // Texture to sense from
-uniform vec2 screenSize;
+uniform vec2 simSize;
 
 uniform float senseAngle;
 uniform float rotateAngle;
@@ -35,15 +35,15 @@ void main()
 
     // Sense ahead
     // @todo check texture sampling is repeating (not clamping)
-    vec2 pos_a = vec2( agent.r, agent.g ) * screenSize + dir_a * senseOffset;
+    vec2 pos_a = vec2( agent.r, agent.g ) * simSize + dir_a * senseOffset;
     float sense_a = texture( senseTexture, pos_a ).r;
 
     // Sense left
-    vec2 pos_l = vec2( agent.r, agent.g ) * screenSize + dir_l * senseOffset;
+    vec2 pos_l = vec2( agent.r, agent.g ) * simSize + dir_l * senseOffset;
     float sense_l = texture( senseTexture, pos_l ).r;
 
     // Sense right
-    vec2 pos_r = vec2( agent.r, agent.g ) * screenSize  + dir_r * senseOffset;
+    vec2 pos_r = vec2( agent.r, agent.g ) * simSize  + dir_r * senseOffset;
     float sense_r = texture( senseTexture, pos_r ).r;
 
     vec2 dir = dir_a;
@@ -74,9 +74,9 @@ void main()
     }
 
 
-    // @todo factor screenSize here
+    // @todo factor simSize here
  //   agent.rg += dir * stepSize * 0.01;
-    agent.rg += dir * vec2( stepSize, stepSize ) / screenSize;
+    agent.rg += dir * vec2( stepSize, stepSize ) / simSize;
 
     if( agent.r > 1. )
     {

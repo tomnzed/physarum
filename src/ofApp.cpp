@@ -13,6 +13,9 @@ const float ROTATE_ANGLE = 30;
 const float STEP_SIZE = 1;
 const size_t CHEMO_DEPOSIT = 1;
 const size_t MAX_CHEMO = 5;
+const size_t POINT_SIZE = 2;
+const ofVec2f SIMULATION_SIZE{ 1280 * 2, 800 * 2 };
+const size_t SCREEN_DOWNSAMPLE = 2;
 
 const float DISPLAY_NORMAL_X = 0.4;
 const float DISPLAY_NORMAL_Y = 0.6;
@@ -58,13 +61,13 @@ void ofApp::setup(){
     point_shader.load("shader/point");
     display_shader.load("shader/display");
     
-    screen_size = { 1280, 800 };
+    screen_size = SIMULATION_SIZE / SCREEN_DOWNSAMPLE;
     
     ofSetWindowShape( screen_size.x, screen_size.y );
     
     ofFboSettings fbo_settings;
-    fbo_settings.width = screen_size.x;
-    fbo_settings.height = screen_size.y;
+    fbo_settings.width = SIMULATION_SIZE.x;
+    fbo_settings.height = SIMULATION_SIZE.y;
     fbo_settings.internalformat = GL_RGBA32F;
     
     err = glGetError();
@@ -168,6 +171,8 @@ void ofApp::DrawPrettySense()
     display_shader.setUniformTexture("senseTexture", sense_fbo.getTexture(), 2);
     display_shader.setUniform1f( "normalX", DISPLAY_NORMAL_X );
     display_shader.setUniform1f( "normalY", DISPLAY_NORMAL_Y );
+    display_shader.setUniform1i( "downsample", SCREEN_DOWNSAMPLE );
+    display_shader.setUniform2f( "screenSize", screen_size.x, screen_size.y );
     
     {
         ofRectangle rect ( 0, 0, screen_size.x, screen_size.y );
@@ -187,9 +192,7 @@ void ofApp::DrawAgents()
     ofSetColor(255);
     
     point_shader.begin();
-    point_shader.setUniform2fv( "screenSize", screen_size.getPtr() );
-    
-    glPointSize( 1 );
+    glPointSize( POINT_SIZE );
     agent_vbo.draw( GL_POINTS, 0, agents.size() );
     point_shader.end();
 }
@@ -203,13 +206,13 @@ void ofApp::DrawSense()
     diffuse_shader.begin();
     diffuse_shader.setUniformTexture("agentTexture", agent_fbo.getTexture(), 1);
     diffuse_shader.setUniformTexture("senseTexture", last_sense_fbo.getTexture(), 2);
-    diffuse_shader.setUniform2fv( "screenSize", screen_size.getPtr() );
+    diffuse_shader.setUniform2fv( "simSize", SIMULATION_SIZE.getPtr() );
     diffuse_shader.setUniform1f( "maxChemoAttract", MAX_CHEMO );  // @todo Increase this and add a final shader to display the likely dim fbo
     diffuse_shader.setUniform1f( "depositChemoAttract", CHEMO_DEPOSIT );
     diffuse_shader.setUniform1f( "chemoAttractDecayFactor", DECAY_FACTOR );
     
     {
-        ofRectangle rect ( 0, 0, screen_size.x, screen_size.y );
+        ofRectangle rect ( 0, 0, SIMULATION_SIZE.x, SIMULATION_SIZE.y );
         ofDrawRectangle( rect );
     }
     
@@ -232,7 +235,7 @@ void ofApp::UpdateAgentPositions()
     agent_update_shader.setUniform1f( "rotateAngle", ROTATE_ANGLE );
     agent_update_shader.setUniform1f( "senseOffset", SENSE_OFFSET );
     agent_update_shader.setUniform1f( "stepSize", STEP_SIZE );
-    agent_update_shader.setUniform2fv( "screenSize", screen_size.getPtr() );
+    agent_update_shader.setUniform2fv( "simSize", SIMULATION_SIZE.getPtr() );
     
     {
         ofRectangle rect ( 0, 0, update_fbo.getWidth(), update_fbo.getHeight() );
