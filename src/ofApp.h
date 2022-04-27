@@ -47,7 +47,7 @@ class ofApp : public ofBaseApp{
         float heading;
         float _padding;  // For copying RGBA data to this
     };
-    std::vector<Agent> agents;
+    std::vector<Agent> mAgents;
     size_t count;
     size_t update_fbo_width;  // Used to not exceed the fbo dimensions.
     
@@ -101,4 +101,5 @@ class ofApp : public ofBaseApp{
     std::chrono::steady_clock::time_point mLastFrameTime;
     bool mRunning = true;
     bool mSaveNextFrame = false;
+    bool mDumpAgents = false;
 };

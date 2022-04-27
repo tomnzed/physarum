@@ -106,7 +106,7 @@ void ofApp::setup(){
         count = pixels * POPULATION;
         count = std::floor( static_cast<float>( count ) / update_fbo_width ) * update_fbo_width;  // round it so that there is an agent per texel.
         
-        agents.resize( count, {} );
+        mAgents.resize( count, {} );
         
         for( size_t i = 0; i < count; ++i )
         {
@@ -119,15 +119,15 @@ void ofApp::setup(){
 //            auto x = static_cast<float>( std::rand() ) / RAND_MAX;
 //            auto y = static_cast<float>( std::rand() ) / RAND_MAX;
             auto heading = static_cast<float>( std::rand() ) / RAND_MAX;
-            agents[ i ].x = x;
-            agents[ i ].y = y;
-            agents[ i ].heading = heading;
+            mAgents[ i ].x = x;
+            mAgents[ i ].y = y;
+            mAgents[ i ].heading = heading;
             
 //            std::cout << "Created point at " << x << ", " << y << " with heading " << heading << std::endl;
 //            std::cout << x << ", " << y << ", " << heading << std::endl;
         }
         
-        agent_vbo.setVertexData( &agents[0].x, 2, count, GL_DYNAMIC_DRAW, sizeof(Agent) );
+        agent_vbo.setVertexData( &mAgents[0].x, 2, count, GL_DYNAMIC_DRAW, sizeof(Agent) );
         update_fbo.allocate( count / update_fbo_width, update_fbo_width, GL_RGBA32F );
         update_pbo.allocate( count / update_fbo_width, update_fbo_width, GL_RGBA, GL_DYNAMIC_READ );
     }
@@ -158,7 +158,24 @@ void ofApp::update()
         const std::string filename{ "sense.png" };
         image.save( filename );
         
-        std::cout << "Saved image " << filename;
+        std::cout << "Saved image " << filename << std::endl;
+    }
+    
+    if( mDumpAgents )
+    {
+        mDumpAgents = false;
+        
+        const std::string filename{ "agents.csv" };
+        
+        ofFile file( filename, ofFile::Mode::WriteOnly );
+        auto agents = mAgents;
+        
+        for( auto& a : agents )
+        {
+            file << a.x << ", " << a.y << ", " << a.heading << std::endl;
+        }
+        
+        std::cout << "Saved agents to " << filename << std::endl;
     }
     
 }
@@ -186,14 +203,14 @@ void ofApp::DrawAgents()
 {
     auto timer = mRenderTimes.agent_vbo.TimeThisScope();
     
-    agent_vbo.setVertexData( &agents[0].x, 2, count, GL_DYNAMIC_DRAW, sizeof(Agent) );
+    agent_vbo.setVertexData( &mAgents[0].x, 2, count, GL_DYNAMIC_DRAW, sizeof(Agent) );
     ofClear(0, 0, 0);
     
     ofSetColor(255);
     
     point_shader.begin();
     glPointSize( POINT_SIZE );
-    agent_vbo.draw( GL_POINTS, 0, agents.size() );
+    agent_vbo.draw( GL_POINTS, 0, mAgents.size() );
     point_shader.end();
 }
 
@@ -226,7 +243,7 @@ void ofApp::UpdateAgentPositions()
     update_fbo.begin();
     
     // @todo: Set this from the PBO so to not require the data on the CPU.
-    agent_texture.loadData( &agents[0].x, count / update_fbo_width, update_fbo_width, GL_RGBA );
+    agent_texture.loadData( &mAgents[0].x, count / update_fbo_width, update_fbo_width, GL_RGBA );
     agent_update_shader.begin();
     agent_update_shader.setUniformTexture("agentTexture", agent_texture, 1);
     agent_update_shader.setUniformTexture("senseTexture", last_sense_fbo.getTexture(), 2);
@@ -247,7 +264,7 @@ void ofApp::UpdateAgentPositions()
     
     update_pbo.readPixels( update_fbo );
     auto gpu_memory = update_pbo.map( GL_PIXEL_PACK_BUFFER, GL_READ_ONLY );
-    std::copy( gpu_memory, gpu_memory + agents.size() * sizeof(Agent) / sizeof(float), &agents[0].x );
+    std::copy( gpu_memory, gpu_memory + mAgents.size() * sizeof(Agent) / sizeof(float), &mAgents[0].x );
     update_pbo.unmap( GL_PIXEL_PACK_BUFFER );
 }
 
@@ -311,6 +328,10 @@ void ofApp::keyPressed(int key){
             
         case 'c':
             mSaveNextFrame = true;
+            break;
+            
+        case 'd':
+            mDumpAgents = true;
             break;
     }
 }
