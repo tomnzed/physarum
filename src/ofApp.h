@@ -41,6 +41,7 @@ class ofApp : public ofBaseApp{
     
     ofVec2f screen_size;
     
+    // The data of each agent
     struct Agent {
         float x;
         float y;
@@ -48,7 +49,8 @@ class ofApp : public ofBaseApp{
         float _padding;  // For copying RGBA data to this
     };
     std::vector<Agent> mAgents;
-    size_t count;
+
+    size_t count;  // The number of agents being simulated
     size_t update_fbo_width;  // Used to not exceed the fbo dimensions.
     
     struct RenderTimes

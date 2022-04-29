@@ -6,7 +6,8 @@ A GPU simulation of Physarum polycephalum using shaders. Simulates 500k agents a
 
 ## Setup
 - Install [openFrameworks](https://openframeworks.cc/)
-- Clone this repository to be located in openFrameworks/apps/myApps/
+- Install [ofxBufferObject](https://github.com/tobiasebsen/ofxBufferObject) addon to openFrameworks/addons/ofxBufferObject
+- Clone this repository to be located at openFrameworks/apps/myApps/app_with_shader
 
 
 ## References

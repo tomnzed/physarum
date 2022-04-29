@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0961F5B327C1E33800033F18 /* ofxTexCoordBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0961F5A627C1E33800033F18 /* ofxTexCoordBuffer.cpp */; };
+		0961F5B427C1E33800033F18 /* ofxColorBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0961F5A727C1E33800033F18 /* ofxColorBuffer.cpp */; };
+		0961F5B527C1E33800033F18 /* ofxBufferObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0961F5A927C1E33800033F18 /* ofxBufferObject.cpp */; };
+		0961F5B627C1E33800033F18 /* ofxVertexBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0961F5AD27C1E33800033F18 /* ofxVertexBuffer.cpp */; };
+		0961F5B727C1E33800033F18 /* ofxIndexBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0961F5B127C1E33800033F18 /* ofxIndexBuffer.cpp */; };
+		0961F5B827C1E33800033F18 /* ofxBufferMesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0961F5B227C1E33800033F18 /* ofxBufferMesh.cpp */; };
 		E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E4B69E1D0A3A1BDC003C02F2 /* main.cpp */; };
 		E4B69E210A3A1BDC003C02F2 /* ofApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E4B69E1E0A3A1BDC003C02F2 /* ofApp.cpp */; };
 /* End PBXBuildFile section */
@@ -24,6 +30,19 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0961F5A627C1E33800033F18 /* ofxTexCoordBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxTexCoordBuffer.cpp; sourceTree = "<group>"; };
+		0961F5A727C1E33800033F18 /* ofxColorBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxColorBuffer.cpp; sourceTree = "<group>"; };
+		0961F5A827C1E33800033F18 /* ofxVertexBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxVertexBuffer.h; sourceTree = "<group>"; };
+		0961F5A927C1E33800033F18 /* ofxBufferObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxBufferObject.cpp; sourceTree = "<group>"; };
+		0961F5AA27C1E33800033F18 /* ofxBufferObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxBufferObject.h; sourceTree = "<group>"; };
+		0961F5AB27C1E33800033F18 /* ofxPixelBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxPixelBuffer.h; sourceTree = "<group>"; };
+		0961F5AC27C1E33800033F18 /* ofxColorBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxColorBuffer.h; sourceTree = "<group>"; };
+		0961F5AD27C1E33800033F18 /* ofxVertexBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxVertexBuffer.cpp; sourceTree = "<group>"; };
+		0961F5AE27C1E33800033F18 /* ofxIndexBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxIndexBuffer.h; sourceTree = "<group>"; };
+		0961F5AF27C1E33800033F18 /* ofxTexCoordBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxTexCoordBuffer.h; sourceTree = "<group>"; };
+		0961F5B027C1E33800033F18 /* ofxBufferMesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxBufferMesh.h; sourceTree = "<group>"; };
+		0961F5B127C1E33800033F18 /* ofxIndexBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxIndexBuffer.cpp; sourceTree = "<group>"; };
+		0961F5B227C1E33800033F18 /* ofxBufferMesh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxBufferMesh.cpp; sourceTree = "<group>"; };
 		E42962AC2163EDD300A6A9E2 /* ofCamera.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ofCamera.cpp; path = ../../../libs/openFrameworks/3d/ofCamera.cpp; sourceTree = SOURCE_ROOT; };
 		E42962AD2163EDD300A6A9E2 /* ofMesh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ofMesh.h; path = ../../../libs/openFrameworks/3d/ofMesh.h; sourceTree = SOURCE_ROOT; };
 		E42962AE2163EDD300A6A9E2 /* ofNode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ofNode.h; path = ../../../libs/openFrameworks/3d/ofNode.h; sourceTree = SOURCE_ROOT; };
@@ -218,6 +237,27 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0961F5A527C1E33800033F18 /* ofxBufferObject */ = {
+			isa = PBXGroup;
+			children = (
+				0961F5A627C1E33800033F18 /* ofxTexCoordBuffer.cpp */,
+				0961F5A727C1E33800033F18 /* ofxColorBuffer.cpp */,
+				0961F5A827C1E33800033F18 /* ofxVertexBuffer.h */,
+				0961F5A927C1E33800033F18 /* ofxBufferObject.cpp */,
+				0961F5AA27C1E33800033F18 /* ofxBufferObject.h */,
+				0961F5AB27C1E33800033F18 /* ofxPixelBuffer.h */,
+				0961F5AC27C1E33800033F18 /* ofxColorBuffer.h */,
+				0961F5AD27C1E33800033F18 /* ofxVertexBuffer.cpp */,
+				0961F5AE27C1E33800033F18 /* ofxIndexBuffer.h */,
+				0961F5AF27C1E33800033F18 /* ofxTexCoordBuffer.h */,
+				0961F5B027C1E33800033F18 /* ofxBufferMesh.h */,
+				0961F5B127C1E33800033F18 /* ofxIndexBuffer.cpp */,
+				0961F5B227C1E33800033F18 /* ofxBufferMesh.cpp */,
+			);
+			name = ofxBufferObject;
+			path = ../../../addons/ofxBufferObject/ofxBufferObject;
+			sourceTree = "<group>";
+		};
 		6948EE371B920CB800B5AC1A /* local_addons */ = {
 			isa = PBXGroup;
 			children = (
@@ -228,6 +268,7 @@
 		BB4B014C10F69532006C3DED /* addons */ = {
 			isa = PBXGroup;
 			children = (
+				0961F5A527C1E33800033F18 /* ofxBufferObject */,
 			);
 			name = addons;
 			sourceTree = "<group>";
@@ -635,8 +676,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0961F5B527C1E33800033F18 /* ofxBufferObject.cpp in Sources */,
+				0961F5B627C1E33800033F18 /* ofxVertexBuffer.cpp in Sources */,
 				E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */,
+				0961F5B427C1E33800033F18 /* ofxColorBuffer.cpp in Sources */,
 				E4B69E210A3A1BDC003C02F2 /* ofApp.cpp in Sources */,
+				0961F5B327C1E33800033F18 /* ofxTexCoordBuffer.cpp in Sources */,
+				0961F5B827C1E33800033F18 /* ofxBufferMesh.cpp in Sources */,
+				0961F5B727C1E33800033F18 /* ofxIndexBuffer.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -795,6 +842,7 @@
 					"$(OF_CORE_LIBS)",
 					"$(OF_CORE_FRAMEWORKS)",
 					"$(LIB_OF_DEBUG)",
+					"-fsanitize=address",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)Debug";
 				WRAPPER_EXTENSION = app;
@@ -824,6 +872,7 @@
 					"$(OF_CORE_LIBS)",
 					"$(OF_CORE_FRAMEWORKS)",
 					"$(LIB_OF)",
+					"-fsanitize=address",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
