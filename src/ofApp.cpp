@@ -5,15 +5,15 @@
 #include <chrono>
 #include <math.h>
 
-const float POPULATION = 0.5;
-const float DECAY_FACTOR = 0.15;
-const float SENSE_ANGLE = 15;
-const size_t SENSE_OFFSET = 3;
-const float ROTATE_ANGLE = 30;
-const float STEP_SIZE = 1;
+const float POPULATION = 0.25;
+const float DECAY_FACTOR = 0.10;
+const float SENSE_ANGLE = 25;
+const size_t SENSE_OFFSET = 6;
+const float ROTATE_ANGLE = 40;
+const float STEP_SIZE = 3;
 const size_t CHEMO_DEPOSIT = 1;
 const size_t MAX_CHEMO = 5;
-const size_t POINT_SIZE = 2;
+const size_t POINT_SIZE = 1;
 const ofVec2f SIMULATION_SIZE{ 1280 * 2, 800 * 2 };
 const size_t SCREEN_DOWNSAMPLE = 2;
 
@@ -110,11 +110,16 @@ void ofApp::setup(){
         
         for( size_t i = 0; i < count; ++i )
         {
-            auto angle = static_cast<float>( std::rand() ) / RAND_MAX * M_PI * 2;
-            auto r = static_cast<float>( std::rand() ) / RAND_MAX;
+//            // Random point in a circle
+//            auto angle = static_cast<float>( std::rand() ) / RAND_MAX * M_PI * 2;
+//            auto r = static_cast<float>( std::rand() ) / RAND_MAX;
+//            auto x = sin( angle ) * r * 0.25 + 0.5;
+//            auto y = cos( angle ) * r * 0.25 + 0.5;
             
-            auto x = sin( angle ) * r * 0.25 + 0.5;
-            auto y = cos( angle ) * r * 0.25 + 0.5;
+            // Random point covering the whole area
+            auto x = static_cast<float>( std::rand() ) / RAND_MAX;
+            auto y = static_cast<float>( std::rand() ) / RAND_MAX;
+            
 //            auto heading = angle / ( M_PI * 2 );
 //            auto x = static_cast<float>( std::rand() ) / RAND_MAX;
 //            auto y = static_cast<float>( std::rand() ) / RAND_MAX;

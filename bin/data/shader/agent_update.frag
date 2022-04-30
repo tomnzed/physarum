@@ -96,7 +96,12 @@ void main()
         agent.g += 1.;
     }
 
-    agent.b = head / ( 2 * radians( 180 ) );
+    // Instread of the below, there were quite nice results with this bug present
+    // agent.b = head / ( 2 * radians( 180 ) );
+
+    // Normalise the heading and take the fractional part (whole rotations don't matter)
+    head /= 2 * radians( 180 );
+    agent.b = fract( agent.b );
 
     outputColor = vec4( agent, 1. );
 }
