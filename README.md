@@ -12,6 +12,7 @@ A GPU simulation of Physarum polycephalum using shaders. Simulates 256k agents a
 
 ## References
 - Sage Jenson who has done highly detailed simulations and has a handy diagram to refer to https://cargocollective.com/sagejenson/physarum
+- This paper describes the process and effect of parameters in great detail https://uwe-repository.worktribe.com/output/980579/characteristics-of-pattern-formation-and-evolution-in-approximations-of-physarum-transport-networks
 
 
 ## Todo
